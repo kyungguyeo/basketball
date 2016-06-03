@@ -1,6 +1,12 @@
 import urllib2
 from bs4 import BeautifulSoup
 
+####To-do's
+#Create class with methods, instead of this nasty arch
+#Create method to store html pages in hdfs
+#Create method to store season data to msql db
+#Ideas for scraping other data from html pages
+
 def Player_Scrape_by_Season(url):
 	"""
 	Scrapes a player's season-by-season stats
