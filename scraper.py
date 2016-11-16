@@ -46,7 +46,27 @@ def Player_Game_Log_Scrape(soup):
 					for data in log:
 						all_gamelogs[date][data["data-stat"]] = data.getText() #get all stats of gamelog
 	return all_gamelogs
-	
+
+def Box_Score_Scrape(url):
+	"""
+	Scrape every boxscore for the particular day on basketball-reference
+	"""
+	response = urllib2.urlopen(url)
+	html = response.read()
+	response.close()
+	soup = BeautifulSoup(html, 'html.parser')
+	all_game_scores = {}
+	game_scores = soup.find_all("div", class_='game_summary expanded nohover')
+	for score in game_scores:
+		losing_team = score.find("tr",class_="loser").findChildren()[0].getText()
+		losing_score = score.find("tr",class_="loser").findChildren()[2].getText()
+		winning_team = score.find("tr",class_="winner").findChildren()[0].getText()
+		winning_score = score.find("tr",class_="winner").findChildren()[2].getText()
+		all_game_scores[score.find_all("a")[1]['href'][11:-5]] = (winning_team, losing_team, winning_score, losing_score) #super hard-coded way to get unique id of each game
+	return all_game_scores
+
+
+
 
 				
 
@@ -55,12 +75,14 @@ if __name__ == "__main__":
 	letters=map(chr, range(97, 123))
 	##Grab Player GameLogs
 	url = 'http://www.basketball-reference.com/players/a/acyqu01.html'
+	test_url = 'http://www.basketball-reference.com/boxscores/index.cgi?month=11&day=2&year=1946'
 	response = urllib2.urlopen(url)
 	html = response.read()
 	response.close()
 	soup = BeautifulSoup(html, 'html.parser')
 	Player_Game_Log_Scrape(soup)
 	Player_Scrape_by_Season(soup)
+	Box_Score_Scrape(test_url)
 
 
 
