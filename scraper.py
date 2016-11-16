@@ -1,12 +1,6 @@
 import urllib2
 from bs4 import BeautifulSoup
 
-####To-do's
-#Create class with methods, instead of this nasty arch
-#Create method to store html pages in hdfs
-#Create method to store season data to msql db
-#Ideas for scraping other data from html pages
-
 def Player_Scrape_by_Season(soup):
 	"""
 	Scrapes a player's season-by-season per-game stats
@@ -96,7 +90,7 @@ if __name__ == "__main__":
 	Player_Game_Log_Scrape(soup)
 	Player_Scrape_by_Season(soup)
 	Box_Score_Scrape(test_url)
-	
+
 	##Grab Player Data
 	for letter in letters:
 		response = urllib2.urlopen('http://www.basketball-reference.com/players/'+ letter)
