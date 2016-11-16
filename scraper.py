@@ -65,10 +65,22 @@ def Box_Score_Scrape(url):
 		all_game_scores[score.find_all("a")[1]['href'][11:-5]] = (winning_team, losing_team, winning_score, losing_score) #super hard-coded way to get unique id of each game
 	return all_game_scores
 
-
-
-
-				
+def Season_Standings_Scrape(url):
+	"""
+	Scrape season standings for that particular season
+	"""
+	response = urllib2.urlopen(url)
+	html = response.read()
+	response.close()
+	soup = BeautifulSoup(html, 'html.parser')
+	all_season_standings = {}
+	standings = soup.find(id='all_divs_standings_').find("tbody").find_all("tr", class_="full_table")
+	for team in standings:
+		teamname = team.find(attrs={'data-stat':"team_name"}).getText()
+		teamwins = team.find(attrs={'data-stat':"wins"}).getText()
+		teamlosses = team.find(attrs={'data-stat':"losses"}).getText()
+		all_season_standings[teamname] = (teamwins, teamlosses)
+	return all_season_standings
 
 if __name__ == "__main__":
 	player_data = {}
@@ -76,6 +88,7 @@ if __name__ == "__main__":
 	##Grab Player GameLogs
 	url = 'http://www.basketball-reference.com/players/a/acyqu01.html'
 	test_url = 'http://www.basketball-reference.com/boxscores/index.cgi?month=11&day=2&year=1946'
+	standings_url = 'http://www.basketball-reference.com/leagues/NBA_1950.html'
 	response = urllib2.urlopen(url)
 	html = response.read()
 	response.close()
@@ -83,18 +96,7 @@ if __name__ == "__main__":
 	Player_Game_Log_Scrape(soup)
 	Player_Scrape_by_Season(soup)
 	Box_Score_Scrape(test_url)
-
-
-
-
-	# season_data = soup.find(id='all_totals')
-	# colnames = []
-	# for colname in season_data.find_all('th'):
-	# 	colnames.append(colname.attrs['tip'])
-	# colnames[0] = 'Season' #Manual Adjustments
-	# colnames[1] = 'Age' #Manual Adjustments
-	# colnames[17] = 'Effective Field Goal Percentage' #Manual Adjustments
-
+	
 	##Grab Player Data
 	for letter in letters:
 		response = urllib2.urlopen('http://www.basketball-reference.com/players/'+ letter)
