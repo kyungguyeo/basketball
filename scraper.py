@@ -91,7 +91,10 @@ if __name__ == "__main__":
 	Player_Scrape_by_Season(soup)
 	Box_Score_Scrape(test_url)
 
-	##Grab Player Data
+
+	####Spark Stuff########
+
+	##Parallizing player_scrape_by_season
 	for letter in letters:
 		response = urllib2.urlopen('http://www.basketball-reference.com/players/'+ letter)
 		html = response.read()
@@ -100,5 +103,6 @@ if __name__ == "__main__":
 		for active_players in soup.find_all('strong'):
 			print 'scraping data for ' + active_players.text + '...'
 			url = 'http://www.basketball-reference.com'+ active_players.find('a').attrs['href']
-			print 'url: ' + url
-			player_data[active_players.text] = Player_Scrape_by_Season(url)
+			player_urls.append(url)
+	sc.parallelize(player_urls)
+	
