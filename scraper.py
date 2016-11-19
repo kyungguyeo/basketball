@@ -6,7 +6,7 @@ def player_scrape_by_season(soup):
     """
     Scrapes a player's season-by-season per-game stats
     """
-    #Grab Per-Game Numbers
+    # Grab Per-Game Numbers
     all_seasonlogs = {}
     season_per_game = soup.find(id='all_per_game').find_all("tr")
     for season in season_per_game:
@@ -72,10 +72,10 @@ def season_standings_scrape(url):
     all_season_standings = {}
     standings = soup.find(id='all_divs_standings_').find("tbody").find_all("tr", class_="full_table")
     for team in standings:
-        teamname = team.find(attrs={'data-stat':"team_name"}).getText()
-        teamwins = team.find(attrs={'data-stat':"wins"}).getText()
-        teamlosses = team.find(attrs={'data-stat':"losses"}).getText()
-        all_season_standings[teamname] = (teamwins, teamlosses)
+        team_name = team.find(attrs={'data-stat':"team_name"}).getText()
+        team_wins = team.find(attrs={'data-stat':"wins"}).getText()
+        team_losses = team.find(attrs={'data-stat':"losses"}).getText()
+        all_season_standings[team_name] = (team_wins, team_losses)
     return all_season_standings
 
 if __name__ == "__main__":
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
     player_data = {}
     letters=map(chr, range(97, 123))
-    #Grab Player GameLogs
+    # Grab player gameLogs
     url = 'http://www.basketball-reference.com/players/a/acyqu01.html'
     test_url = 'http://www.basketball-reference.com/boxscores/index.cgi?month=11&day=2&year=1946'
     standings_url = 'http://www.basketball-reference.com/leagues/NBA_1950.html'
@@ -95,10 +95,8 @@ if __name__ == "__main__":
     player_scrape_by_season(soup)
     box_score_scrape(test_url)
 
-
-    ####Spark Stuff########
-
-    ##Parallizing player_scrape_by_season
+    # Spark Stuff
+    # Parallel player_scrape_by_season
     for letter in letters:
         response = urllib2.urlopen('http://www.basketball-reference.com/players/'+ letter)
         html = response.read()
