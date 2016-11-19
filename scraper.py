@@ -1,11 +1,13 @@
 import urllib2
 from bs4 import BeautifulSoup
+from pyspark import SparkContext, SparkConf
 
 def Player_Scrape_by_Season(soup):
 	"""
 	Scrapes a player's season-by-season per-game stats
 	"""
 	##Grab Per-Game Numbers
+	all_seasonlogs = {}
 	season_per_game = soup.find(id='all_per_game').find_all("tr")
 	for season in season_per_game:
 		if season.has_attr('id'):
@@ -77,6 +79,8 @@ def Season_Standings_Scrape(url):
 	return all_season_standings
 
 if __name__ == "__main__":
+	conf = SparkConf().setAppName("Bball_stat_crawler")
+    sc = SparkContext(conf=conf)
 	player_data = {}
 	letters=map(chr, range(97, 123))
 	##Grab Player GameLogs
@@ -104,5 +108,7 @@ if __name__ == "__main__":
 			print 'scraping data for ' + active_players.text + '...'
 			url = 'http://www.basketball-reference.com'+ active_players.find('a').attrs['href']
 			player_urls.append(url)
-	sc.parallelize(player_urls)
-	
+	player_url_parlzd = sc.parallelize(player_urls)
+	player_url_parlzd.map(lambda x: Player_Scrape_by_Season(x))
+	player_url_parlzd.map(lambda x: Player_Game_Log_Scrape(x))
+
