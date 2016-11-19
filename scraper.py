@@ -2,6 +2,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from pyspark import SparkContext, SparkConf
 
+
 def player_scrape_by_season(soup):
     """
     Scrapes a player's season-by-season per-game stats
@@ -43,6 +44,7 @@ def player_game_log_scrape(soup):
                         all_gamelogs[date][data["data-stat"]] = data.getText() #get all stats of gamelog
     return all_gamelogs
 
+
 def box_score_scrape(url):
     """
     Scrape every boxscore for the particular day on basketball-reference
@@ -60,6 +62,7 @@ def box_score_scrape(url):
         winning_score = score.find("tr",class_="winner").findChildren()[2].getText()
         all_game_scores[score.find_all("a")[1]['href'][11:-5]] = (winning_team, losing_team, winning_score, losing_score) #super hard-coded way to get unique id of each game
     return all_game_scores
+
 
 def season_standings_scrape(url):
     """
