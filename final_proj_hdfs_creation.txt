@@ -1,0 +1,14 @@
+slcli vs create --datacenter=sjc01 --hostname=master --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+slcli vs create --datacenter=sjc01 --hostname=slave1 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+slcli vs create --datacenter=sjc01 --hostname=slave2 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+slcli vs create --datacenter=sjc01 --hostname=slave3 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+slcli vs create --datacenter=sjc01 --hostname=slave4 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+
+ssh-keygen
+for i in master slave1 slave2 slave3 slave4; do ssh-copy-id $i; done
+for i in 0.0.0.0 master slave1 slave2 slave3 slave4; do ssh $i; done
