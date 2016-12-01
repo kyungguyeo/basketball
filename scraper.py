@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import datetime, json, urllib2
 from pyspark import SparkContext, SparkConf
 import requests, unicodedata
-import re, collections
+import re, pandas
 
 
 def player_scrape_by_season(url):
@@ -15,7 +15,7 @@ def player_scrape_by_season(url):
     soup = BeautifulSoup(html, 'html.parser')
     all_seasonlogs = {}
     filename = url.strip(".html").split("/")[-1]
-    all_seasonlogs['filename'] = filename + '_seasonlogs.json'
+    all_seasonlogs['filename'] = filename + '_seasonlogs.csv'
     season_per_game = soup.find(id='all_per_game').find_all("tr")
     for season in season_per_game:
         if season.has_attr('id'):
@@ -44,7 +44,7 @@ def player_game_log_scrape(url):
     soup = BeautifulSoup(html, 'html.parser')
     all_game_logs = {}
     filename = url.strip(".html").split("/")[-1]
-    all_game_logs['filename'] = filename + '_gamelogs.json'
+    all_game_logs['filename'] = filename + '_gamelogs.csv'
     game_logs = soup.find("li", class_="full hasmore ").find_all("a", href=True)
     all_logs = []
     for logs in game_logs:
@@ -83,7 +83,7 @@ def box_score_scrape(url):
     response.close()
     soup = BeautifulSoup(html, 'html.parser')
     all_game_scores = {}
-    filename = ''.join(re.findall(r'\d+', url)) + '.json'  # MONTHDAYYEAR FORMAT
+    filename = ''.join(re.findall(r'\d+', url)) + '.csv'  # MONTHDAYYEAR FORMAT
     all_game_scores['filename'] = filename
     game_scores = soup.find_all("div", class_='game_summary expanded nohover')
     for score in game_scores:
@@ -105,13 +105,13 @@ def season_standings_scrape(url):
     response.close()
     soup = BeautifulSoup(html, 'html.parser')
     all_season_standings = {}
-    filename = re.findall(r'\d+', url)[0] + '.json'
+    filename = re.findall(r'\d+', url)[0] + '.csv'
     all_season_standings['filename'] = filename
     standings_e = soup.find(id='all_divs_standings_E').find("tbody").find_all("tr", class_="full_table")
     standings_w = soup.find(id='all_divs_standings_W').find("tbody").find_all("tr", class_="full_table")
     for team in (standings_e + standings_w):
         team_name = team.find(attrs={'data-stat': "team_name"}).getText()
-        team_name = ' '.join(unicodedata.normalize("NFKD", team_name).split(' ')[:-2])
+        team_name = ' '.join(unicodedata.normalize("NFKD", team_name).split(' ')[:-2]).strip('*')
         team_wins = team.find(attrs={'data-stat': "wins"}).getText()
         team_losses = team.find(attrs={'data-stat': "losses"}).getText()
         all_season_standings[team_name] = (team_wins, team_losses)
@@ -137,33 +137,17 @@ if __name__ == "__main__":
 
     # Grab Player Season Data
     player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).take(1)
-    if 'local' in sc.getConf().get('spark.master'):
-        for data in player_season_data:
-            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
-            with open(path, 'w') as fp:
-                json.dump(data, fp)
-            break
-    else:
-        # for data in player_season_data:
-        # path = hdfs://path_to_hdfs_dir + data['filename']
-        # with open(path, 'w') as fp:
-        #     json.dump(data, fp)
-        pass
+    for data in player_season_data:
+        path = '/playerseasonlogs/' + data['filename']
+        data.pop('filename', None)
+        pandas.DataFrame.from_dict(data).T.to_csv(path)
 
     # Grab Player Game Log Data
     player_game_log_data = player_url_par.map(lambda x: player_game_log_scrape(x)).take(1)
-    if 'local' in sc.getConf().get('spark.master'):
-        for data in player_game_log_data:
-            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
-            with open(path, 'w') as fp:
-                json.dump(data, fp)
-            break
-    else:
-        # for data in player_game_log_data:
-        # path = hdfs://path_to_hdfs_dir + data['filename']
-        # with open(path, 'w') as fp:
-        #     json.dump(data, fp)
-        pass
+    for data in player_game_log_data:
+        path = '/playergamelogs/' + data['filename']
+        data.pop('filename', None)
+        pandas.DataFrame.from_dict(data).T.to_csv(path)
 
     # Aggregate boxscore urls for box_score_scrape
     currentdate = datetime.datetime(day=27, month=11, year=2016)
@@ -177,34 +161,20 @@ if __name__ == "__main__":
     # Grab Boxscore Data
     boxscore_url_par = sc.parallelize(all_boxscore_urls)
     boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).take(1)
-    if 'local' in sc.getConf().get('spark.master'):
-        for data in boxscore_data:
-            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
-            with open(path, 'w') as fp:
-                json.dump(data, fp)
-    else:
-        # for data in boxscore_data:
-        # path = hdfs://path_to_hdfs_dir + data['filename']
-        # with open(path, 'w') as fp:
-        #     json.dump(data, fp)
-        pass
+    for data in boxscore_data:
+        path = '/gamescore/' + data['filename']
+        data.pop('filename', None)
+        pandas.DataFrame.from_dict(data).T.to_csv(path)
 
     # Aggregate standings urls for season_standings_scrape
     all_standings_urls = []
     for i in range(1971, 1972):
         all_standings_urls.append('http://www.basketball-reference.com/leagues/NBA_%s.html' % (i))
 
-    # Grab Season Standings Data
+    # # Grab Season Standings Data
     standings_url_par = sc.parallelize(all_standings_urls)
     season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).take(1)
-    if 'local' in sc.getConf().get('spark.master'):
-        for data in season_standings_data:
-            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
-            with open(path, 'w') as fp:
-                json.dump(data, fp)
-    else:
-        # for data in season_standings_data:
-            # path = hdfs://path_to_hdfs_dir + data['filename']
-            # with open(path, 'w') as fp:
-            #     json.dump(data, fp)
-        pass
+    for data in season_standings_data:
+        path = '/seasonstandings/' + data['filename']
+        data.pop('filename', None)
+        pandas.DataFrame.from_dict(data).T.to_csv(path)
