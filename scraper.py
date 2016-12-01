@@ -122,9 +122,8 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
 
     # Aggregate player urls for player_scrape_by_season
-    # letters = map(chr, range(97, 123))
-    # letters.remove('x')
-    letters = 'a'
+    letters = map(chr, range(97, 123))
+    letters.remove('x')
     player_urls = []
     for letter in letters:
         response = requests.get('http://www.basketball-reference.com/players/' + letter)
@@ -150,7 +149,7 @@ if __name__ == "__main__":
         pandas.DataFrame.from_dict(data).T.to_csv(path)
 
     # Aggregate boxscore urls for box_score_scrape
-    currentdate = datetime.datetime(day=27, month=11, year=2016)
+    currentdate = datetime.datetime(day=2, month=11, year=1946)
     enddate = datetime.datetime.now()
     all_boxscore_urls = []
     while currentdate < enddate:
@@ -168,7 +167,7 @@ if __name__ == "__main__":
 
     # Aggregate standings urls for season_standings_scrape
     all_standings_urls = []
-    for i in range(1971, 1972):
+    for i in range(1971, 2016):
         all_standings_urls.append('http://www.basketball-reference.com/leagues/NBA_%s.html' % (i))
 
     # # Grab Season Standings Data
