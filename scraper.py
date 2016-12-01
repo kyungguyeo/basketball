@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import datetime, json, urllib2
 from pyspark import SparkContext, SparkConf
+import requests, unicodedata
+import re, collections
 
 
 def player_scrape_by_season(url):
@@ -12,6 +14,8 @@ def player_scrape_by_season(url):
     response.close()
     soup = BeautifulSoup(html, 'html.parser')
     all_seasonlogs = {}
+    filename = url.strip(".html").split("/")[-1]
+    all_seasonlogs['filename'] = filename + '_seasonlogs.json'
     season_per_game = soup.find(id='all_per_game').find_all("tr")
     for season in season_per_game:
         if season.has_attr('id'):
@@ -19,15 +23,16 @@ def player_scrape_by_season(url):
             all_seasonlogs[date] = {}
             for data in season:
                 all_seasonlogs[date][data["data-stat"]] = data.getText()  # get all stats of gamelog
-    filename = url.strip(".html").split("/")[-1] + '.json'
-    if 'local' in sc.getConf().get('spark.master'):
-        path = '/Users/johnnyyeo/Desktop/' + filename
-        with open(path, 'w') as fp:
-            json.dump(all_seasonlogs, fp)
-    else:
-        # path = hdfs://path_to_hdfs_dir + filename
-        # with open(path, 'w') as fp:
-        # json.dump(all_seasonlogs, fp)
+    # if 'local' in sc.getConf().get('spark.master'):
+    #     path = '/Users/johnnyyeo/Desktop/Test_Data' + filename
+    #     with open(path, 'w') as fp:
+    #         json.dump(all_seasonlogs, fp)
+    # else:
+    #     # path = hdfs://path_to_hdfs_dir + filename
+    #     # with open(path, 'w') as fp:
+    #     # json.dump(all_seasonlogs, fp)
+    #     pass
+    return all_seasonlogs
 
 def player_game_log_scrape(url):
     """
@@ -38,6 +43,8 @@ def player_game_log_scrape(url):
     response.close()
     soup = BeautifulSoup(html, 'html.parser')
     all_game_logs = {}
+    filename = url.strip(".html").split("/")[-1]
+    all_game_logs['filename'] = filename + '_gamelogs.json'
     game_logs = soup.find("li", class_="full hasmore ").find_all("a", href=True)
     all_logs = []
     for logs in game_logs:
@@ -55,15 +62,16 @@ def player_game_log_scrape(url):
                     all_game_logs[date] = {}
                     for data in log:
                         all_game_logs[date][data["data-stat"]] = data.getText()  # get all stats of gamelog
-    filename = url.strip(".html").split("/")[-1] + '.json'
-    if 'local' in sc.getConf().get('spark.master'):
-        path = '/Users/johnnyyeo/Desktop/' + filename
-        with open(path, 'w') as fp:
-            json.dump(all_game_logs, fp)
-    else:
-        # path = hdfs://path_to_hdfs_dir + filename
-        # with open(path, 'w') as fp:
-        #     json.dump(all_game_logs, fp)
+    # if 'local' in sc.getConf().get('spark.master'):
+    #     path = '/Users/johnnyyeo/Desktop/Test_Data' + filename
+    #     with open(path, 'w') as fp:
+    #         json.dump(all_game_logs, fp)
+    # else:
+    #     # path = hdfs://path_to_hdfs_dir + filename
+    #     # with open(path, 'w') as fp:
+    #     #     json.dump(all_game_logs, fp)
+    #     pass
+    return all_game_logs
 
 
 def box_score_scrape(url):
@@ -75,6 +83,8 @@ def box_score_scrape(url):
     response.close()
     soup = BeautifulSoup(html, 'html.parser')
     all_game_scores = {}
+    filename = ''.join(re.findall(r'\d+', url)) + '.json'  # MONTHDAYYEAR FORMAT
+    all_game_scores['filename'] = filename
     game_scores = soup.find_all("div", class_='game_summary expanded nohover')
     for score in game_scores:
         losing_team = score.find("tr", class_="loser").findChildren()[0].getText()
@@ -83,15 +93,8 @@ def box_score_scrape(url):
         winning_score = score.find("tr", class_="winner").findChildren()[2].getText()
         all_game_scores[score.find_all("a")[1]['href'][11:-5]] = (
         winning_team, losing_team, winning_score, losing_score)  # super hard-coded way to get unique id of each game
-    filename = re.findall(r'\d+', url) + '.json' MONTHDAYYEAR FORMAT
-    if 'local' in sc.getConf().get('spark.master'):
-        path = '/Users/johnnyyeo/Desktop/' + filename
-        with open(path, 'w') as fp:
-            json.dump(all_game_scores, fp)
-    else:
-        # path = hdfs://path_to_hdfs_dir + filename
-        # with open(path, 'w') as fp:
-        #     json.dump(all_game_scores, fp)
+    return all_game_scores
+
 
 def season_standings_scrape(url):
     """
@@ -102,40 +105,68 @@ def season_standings_scrape(url):
     response.close()
     soup = BeautifulSoup(html, 'html.parser')
     all_season_standings = {}
-    standings = soup.find(id='all_divs_standings_').find("tbody").find_all("tr", class_="full_table")
-    for team in standings:
-        team_name = team.find(attrs={'data-stat': "team_name"}).getText().strip("*")
+    filename = re.findall(r'\d+', url)[0] + '.json'
+    all_season_standings['filename'] = filename
+    standings_e = soup.find(id='all_divs_standings_E').find("tbody").find_all("tr", class_="full_table")
+    standings_w = soup.find(id='all_divs_standings_W').find("tbody").find_all("tr", class_="full_table")
+    for team in (standings_e + standings_w):
+        team_name = team.find(attrs={'data-stat': "team_name"}).getText()
+        team_name = ' '.join(unicodedata.normalize("NFKD", team_name).split(' ')[:-2])
         team_wins = team.find(attrs={'data-stat': "wins"}).getText()
         team_losses = team.find(attrs={'data-stat': "losses"}).getText()
         all_season_standings[team_name] = (team_wins, team_losses)
-    filename = re.findall(r'\d+', url) + '.json'
-    if 'local' in sc.getConf().get('spark.master'):
-        path = '/Users/johnnyyeo/Desktop/' + filename
-        with open(path, 'w') as fp:
-            json.dump(all_season_standings, fp)
-    else:
-        # path = hdfs://path_to_hdfs_dir + filename
-        # with open(path, 'w') as fp:
-        #     json.dump(all_season_standings, fp)
+    return all_season_standings
 
 if __name__ == "__main__":
     conf = SparkConf().setAppName("Bball_stat_crawler")
     sc = SparkContext(conf=conf)
 
     # Aggregate player urls for player_scrape_by_season
-    letters = map(chr, range(97, 123))
+    # letters = map(chr, range(97, 123))
+    # letters.remove('x')
+    letters = 'a'
     player_urls = []
     for letter in letters:
-        response = urllib2.urlopen('http://www.basketball-reference.com/players/' + letter)
-        html = response.read()
-        response.close()
-        soup = BeautifulSoup(html, 'html.parser')
+        response = requests.get('http://www.basketball-reference.com/players/' + letter)
+        soup = BeautifulSoup(response.content, 'html.parser')
         for players in soup.find('tbody').find_all(attrs={'data-stat': 'player'}):
             url = 'http://www.basketball-reference.com' + players.find('a')['href']
             player_urls.append(url)
 
+    player_url_par = sc.parallelize(player_urls)
+
+    # Grab Player Season Data
+    player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).take(1)
+    if 'local' in sc.getConf().get('spark.master'):
+        for data in player_season_data:
+            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
+            with open(path, 'w') as fp:
+                json.dump(data, fp)
+            break
+    else:
+        # for data in player_season_data:
+        # path = hdfs://path_to_hdfs_dir + data['filename']
+        # with open(path, 'w') as fp:
+        #     json.dump(data, fp)
+        pass
+
+    # Grab Player Game Log Data
+    player_game_log_data = player_url_par.map(lambda x: player_game_log_scrape(x)).take(1)
+    if 'local' in sc.getConf().get('spark.master'):
+        for data in player_game_log_data:
+            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
+            with open(path, 'w') as fp:
+                json.dump(data, fp)
+            break
+    else:
+        # for data in player_game_log_data:
+        # path = hdfs://path_to_hdfs_dir + data['filename']
+        # with open(path, 'w') as fp:
+        #     json.dump(data, fp)
+        pass
+
     # Aggregate boxscore urls for box_score_scrape
-    currentdate = datetime.datetime(day=2, month=11, year=1946)
+    currentdate = datetime.datetime(day=27, month=11, year=2016)
     enddate = datetime.datetime.now()
     all_boxscore_urls = []
     while currentdate < enddate:
@@ -143,18 +174,37 @@ if __name__ == "__main__":
                                  (currentdate.month, currentdate.day, currentdate.year))
         currentdate += datetime.timedelta(days=1)
 
+    # Grab Boxscore Data
+    boxscore_url_par = sc.parallelize(all_boxscore_urls)
+    boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).take(1)
+    if 'local' in sc.getConf().get('spark.master'):
+        for data in boxscore_data:
+            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
+            with open(path, 'w') as fp:
+                json.dump(data, fp)
+    else:
+        # for data in boxscore_data:
+        # path = hdfs://path_to_hdfs_dir + data['filename']
+        # with open(path, 'w') as fp:
+        #     json.dump(data, fp)
+        pass
+
     # Aggregate standings urls for season_standings_scrape
     all_standings_urls = []
-    for i in range(1950, 2017):
+    for i in range(1971, 1972):
         all_standings_urls.append('http://www.basketball-reference.com/leagues/NBA_%s.html' % (i))
 
-    # Spark Stuff
-    # player_url_par = sc.parallelize(player_urls)
-    # player_url_par.map(lambda x: player_scrape_by_season(x))
-    # player_url_par.map(lambda x: player_game_log_scrape(x))
-    #
-    # boxscore_url_par = sc.parallelize(all_boxscore_urls)
-    # boxscore_url_par.map(lambda x: box_score_scrape(x))
-
+    # Grab Season Standings Data
     standings_url_par = sc.parallelize(all_standings_urls)
-    standings_url_par.map(lambda x: season_standings_scrape(x))
+    season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).take(1)
+    if 'local' in sc.getConf().get('spark.master'):
+        for data in season_standings_data:
+            path = '/Users/johnnyyeo/Desktop/Test_Data/' + data['filename']
+            with open(path, 'w') as fp:
+                json.dump(data, fp)
+    else:
+        # for data in season_standings_data:
+            # path = hdfs://path_to_hdfs_dir + data['filename']
+            # with open(path, 'w') as fp:
+            #     json.dump(data, fp)
+        pass
