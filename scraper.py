@@ -118,8 +118,7 @@ def season_standings_scrape(url):
     return all_season_standings
 
 if __name__ == "__main__":
-    conf = SparkConf().setAppName("Bball_stat_crawler")
-    sc = SparkContext(conf=conf)
+    sc = SparkContext(appName="Bball_stat_crawler")
 
     # Aggregate player urls for player_scrape_by_season
     letters = map(chr, range(97, 123))
