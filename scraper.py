@@ -135,14 +135,14 @@ if __name__ == "__main__":
     player_url_par = sc.parallelize(player_urls)
 
     # Grab Player Season Data
-    player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).take(10)
+    player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).take(2)
     for data in player_season_data:
         path = '/root/playerseasonlogs/' + data['filename']
         data.pop('filename', None)
         pandas.DataFrame.from_dict(data).T.to_csv(path)
 
     # Grab Player Game Log Data
-    player_game_log_data = player_url_par.map(lambda x: player_game_log_scrape(x)).take(10)
+    player_game_log_data = player_url_par.map(lambda x: player_game_log_scrape(x)).take(2)
     for data in player_game_log_data:
         path = '/root/playergamelogs/' + data['filename']
         data.pop('filename', None)
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
     # Grab Boxscore Data
     boxscore_url_par = sc.parallelize(all_boxscore_urls)
-    boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).take(10)
+    boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).take(2)
     for data in boxscore_data:
         path = '/root/gamescore/' + data['filename']
         data.pop('filename', None)
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
     # # Grab Season Standings Data
     standings_url_par = sc.parallelize(all_standings_urls)
-    season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).take(10)
+    season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).take(2)
     for data in season_standings_data:
         path = '/root/seasonstandings/' + data['filename']
         data.pop('filename', None)
