@@ -1,8 +1,6 @@
 from bs4 import BeautifulSoup
-import datetime, json, urllib2
 from pyspark import SparkContext, SparkConf
-import requests, unicodedata
-import re, pandas
+import datetime, urllib2, requests, unicodedata, re, pandas
 
 
 def player_scrape_by_season(url):
@@ -62,6 +60,7 @@ def player_game_log_scrape(url):
     final_df = pandas.DataFrame.from_dict(all_game_logs, orient='index')
     final_df['player_name'] = player_name
     return final_df, filename
+
 
 def box_score_scrape(url):
     """
@@ -132,13 +131,13 @@ if __name__ == "__main__":
     # Grab Player Season Data
     player_season_data = player_url_par.flatMap(lambda x: player_scrape_by_season(x)).collect()
     for i in [i for i in range(len(player_season_data)) if i % 2 == 0]:
-        path = '/Users/johnnyyeo/Desktop/playerseasonlogs/' + player_season_data[i+1]
+        path = '/root/playerseasonlogs/' + player_season_data[i+1]
         player_season_data[i].to_csv(path, index=False)
 
     # Grab Player Game Log Data
     player_game_log_data = player_url_par.flatMap(lambda x: player_game_log_scrape(x)).collect()
     for i in [i for i in range(len(player_season_data)) if i % 2 == 0]:
-        path = '/Users/johnnyyeo/Desktop/playergamelogs/' + player_game_log_data[i+1]
+        path = '/root/playergamelogs/' + player_game_log_data[i+1]
         player_game_log_data[i].to_csv(path, index=False)
 
     # Aggregate boxscore urls for box_score_scrape
@@ -154,7 +153,7 @@ if __name__ == "__main__":
     boxscore_url_par = sc.parallelize(all_boxscore_urls)
     boxscore_data = boxscore_url_par.flatMap(lambda x: box_score_scrape(x)).collect()
     for i in [i for i in range(len(boxscore_data)) if i % 2 == 0]:
-        path = '/Users/johnnyyeo/Desktop/gamescore/' + boxscore_data[i+1]
+        path = '/root/gamescore/' + boxscore_data[i+1]
         if boxscore_data[i].empty == 0:
             boxscore_data[i].to_csv(path, index=False)
 
@@ -167,5 +166,5 @@ if __name__ == "__main__":
     standings_url_par = sc.parallelize(all_standings_urls)
     season_standings_data = standings_url_par.flatMap(lambda x: season_standings_scrape(x)).collect()
     for i in [i for i in range(len(season_standings_data)) if i % 2 == 0]:
-        path = '/Users/johnnyyeo/Desktop/seasonstandings/' + season_standings_data[i+1]
+        path = '/root/seasonstandings/' + season_standings_data[i+1]
         season_standings_data[i].to_csv(path, index=False)
