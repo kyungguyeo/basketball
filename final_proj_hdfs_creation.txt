@@ -1,14 +1,43 @@
 slcli vs create --datacenter=sjc01 --hostname=master --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
-
 slcli vs create --datacenter=sjc01 --hostname=slave1 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
-
 slcli vs create --datacenter=sjc01 --hostname=slave2 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
-
 slcli vs create --datacenter=sjc01 --hostname=slave3 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
-
 slcli vs create --datacenter=sjc01 --hostname=slave4 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli vs create --datacenter=sjc01 --hostname=slave5 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli vs create --datacenter=sjc01 --hostname=slave6 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli vs create --datacenter=sjc01 --hostname=slave7 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli vs create --datacenter=sjc01 --hostname=slave8 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli vs create --datacenter=sjc01 --hostname=slave9 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli vs create --datacenter=sjc01 --hostname=slave10 --domain=finalproject.com --billing=hourly --key=softlayer --cpu=2 --memory=4096 --disk=25 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+
+127.0.0.1 localhost.localdomain localhost
+23.246.218.75 master.finalproject.com master
+23.246.218.66 slave1.finalproject.com slave1
+23.246.218.70 slave2.finalproject.com slave2
+23.246.218.67 slave3.finalproject.com slave3
+23.246.218.68 slave4.finalproject.com slave4
+169.53.133.141 slave5.finalproject.com slave5
+169.53.133.142 slave6.finalproject.com slave6
+169.53.133.137 slave7.finalproject.com slave7
+169.53.133.130 slave8.finalproject.com slave8
+169.53.133.132 slave9.finalproject.com slave9
+169.53.133.136 slave10.finalproject.com slave10
+
 
 
 ssh-keygen
-for i in master slave1 slave2 slave3 slave4; do ssh-copy-id $i; done
-for i in 0.0.0.0 master slave1 slave2 slave3 slave4; do ssh $i; done
+for i in master slave1 slave2 slave3 slave4 slave5 slave6 slave7 slave8 slave9 slave10; do ssh-copy-id $i; done
+for i in 0.0.0.0 master slave1 slave2 slave3 slave4 slave5 slave6 slave7 slave8 slave9 slave10; do ssh $i; done
+
+
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave1:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave2:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave3:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave4:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave5:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave6:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave7:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave8:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave9:/usr/local/hadoop/etc/hadoop/
+rsync -a /usr/local/hadoop/etc/hadoop/* hadoop@slave10:/usr/local/hadoop/etc/hadoop/

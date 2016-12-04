@@ -153,7 +153,7 @@ if __name__ == "__main__":
     boxscore_url_par = sc.parallelize(all_boxscore_urls)
     boxscore_data = boxscore_url_par.flatMap(lambda x: box_score_scrape(x)).collect()
     for i in [i for i in range(len(boxscore_data)) if i % 2 == 0]:
-        path = '/root/gamescore/' + boxscore_data[i+1]
+        path = '/root/gamescores/' + boxscore_data[i+1]
         if boxscore_data[i].empty == 0:
             boxscore_data[i].to_csv(path, index=False)
 
