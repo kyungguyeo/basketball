@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 
 for url in sys.stdin:

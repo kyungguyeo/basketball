@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys, urllib2, re
 
 for line in sys.stdin:

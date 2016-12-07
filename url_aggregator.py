@@ -1,6 +1,6 @@
 import datetime.datetime
 
-currentdate = datetime.datetime(day=1, month=1, year=1953)
+currentdate = datetime.datetime(day=15, month=12, year=1957)
 enddate = datetime.datetime.now()
 all_boxscore_urls = []
 while currentdate < enddate:

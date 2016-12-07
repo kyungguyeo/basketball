@@ -11,6 +11,20 @@ hdfs dfs -mkdir /playerseasonlogs_raw
 hdfs dfs -mkdir /playergamelogs_raw
 hdfs dfs -mkdir /seasonstandings_raw
 
+# LOAD DATA INTO HDFS
+cd
+mkdir urls
+python url_aggregator.py
+
+cat urls/player_urls.txt | python basketball/player_season_logs/mapper_playerseasonlogs.py | \
+    python basketball/player_season_logs/reducer_playerdata.py
+cat urls/player_urls.txt | python basketball/player_game_logs/mapper_playergamelogs.py | \
+    python basketball/player_game_logs/reducer_playerdata.py
+cat urls/boxscore_urls.txt | python basketball/boxscores/mapper.py | \
+    python basketball/boxscores/reducer_boxscores.py
+cat urls/seasonstanding_urls.txt | python basketball/season_standings/mapper.py | \
+    python basketball/season_standings/reducer_seasonstandings.py
+
 python url_scraper.py
 
 hdfs dfs -mkdir /data
@@ -27,16 +41,7 @@ basketball/hive.sh
 
 hive basketball/hive_db_setup.sh
 
-python url_aggregator.py
-hdfs dfs -mkdir /urls
-hdfs dfs -put player_urls.txt /urls
-hdfs dfs -put seasonstanding_urls.txt /urls
-hdfs dfs -put boxscore_urls.txt /urls
-
-
-/urls
-
 hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-2.7.1.jar \
-    -file mapper.py -mapper mapper.py \
-    -file reducer.py -reducer reducer.py \
-    -input hdfs://23.246.218.75/urls/seasonstanding_urls.txt -output hdfs://23.246.218.75/test/
+-file basketball/season_standings/mapper.py -mapper basketball/season_standings/mapper.py \
+-file basketball/season_standings/reducer_seasonstandings.py -reducer basketball/season_standings/reducer_seasonstandings.py \
+-input hdfs://23.246.218.75/urls/seasonstanding_urls.txt -output hdfs://23.246.218.75/test
