@@ -14,7 +14,7 @@ hdfs dfs -mkdir /seasonstandings_raw
 # LOAD DATA INTO HDFS
 cd
 mkdir urls
-python url_aggregator.py
+python basketball/url_aggregator.py
 
 cat urls/player_urls.txt | python basketball/player_season_logs/mapper_playerseasonlogs.py | \
     python basketball/player_season_logs/reducer_playerdata.py
@@ -24,8 +24,6 @@ cat urls/boxscore_urls.txt | python basketball/boxscores/mapper.py | \
     python basketball/boxscores/reducer_boxscores.py
 cat urls/seasonstanding_urls.txt | python basketball/season_standings/mapper.py | \
     python basketball/season_standings/reducer_seasonstandings.py
-
-python url_scraper.py
 
 hdfs dfs -mkdir /data
 hdfs dfs -mkdir /data/gamescores
