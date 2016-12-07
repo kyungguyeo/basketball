@@ -1,4 +1,4 @@
-import csv
+from subprocess import call
 
 def interacter():
     """
@@ -30,12 +30,10 @@ def interacter():
                     *$ee..  $  ..ze$P
                         *******
 
-    Alright, it looks like the database has finished downloading.
+    Make sure the local Hadoop configuration files are the same as the configuration files of the spark application.
     """
     mode_resp = mode()
     retriever(mode_resp)
-
-
 
 def mode():
     mode = raw_input("What kind of data do you want? (gamescore[g]/seasonstandings[s]/playergamelogs[pg]\
@@ -52,29 +50,44 @@ def retriever(m):
         mmddyyyy-mmddyyyy format for multiple days: ")
         dates = w.split('-')
         for date in dates:
-            path = 'hdfs://gamescore/' + date + '.csv'
-            pass
+            hdfs_path = '/gamescore/' + date + '.csv'
+            command = "hdfs dfs -get " + hdfs_path
+            commands = command.split(" ")
+            call(commands)
+        print "data downloaded from hdfs."
     elif m == 's':
         w = raw_input("You entered seasonstandings. Please input the desired year range, in yyyy format for 1 year, and\
                       yyyy-yyyy format for multiple years: ")
-        dates = w.split('-')
-        for date in dates:
-            path = 'hdfs://seasonstandings/' + date + '.csv'
-            pass
+        years = w.split('-')
+        for year in years:
+            hdfs_path = '/seasonstandings/' + year + 'seasonstandings.csv'
+            command = "hdfs dfs -get " + hdfs_path
+            commands = command.split(" ")
+            call(commands)
+        print "data downloaded from hdfs."
     elif m == 'pg':
         w = raw_input("You entered playergamelogs. Please input the desired player ids (found under \
         http://www.basketball-reference.com/players/). For multiple, separate ids with semicolons (;): ")
         names = w.split(';')
         for name in names:
-            path = 'hdfs://playergamelogs/' + name + '.csv'
-            pass
+            hdfs_path = '/playergamelogs/' + name + '.csv'
+            command = "hdfs dfs -get " + hdfs_path
+            commands = command.split(" ")
+            call(commands)
+        print "data downloaded from hdfs."
     elif m == 'ps':
         w = raw_input("You entered playerseasonlogs. Please input the desired player ids (found under \
         http://www.basketball-reference.com/players/). For multiple, separate ids with semicolons (;): ")
         names = w.split(';')
         for name in names:
-            path = 'hdfs://playerseasonlogs/' + name + '.csv'
-            pass
+            hdfs_path = '/playerseasonlogs/' + name + '.csv'
+            command = "hdfs dfs -get " + hdfs_path
+            commands = command.split(" ")
+            call(commands)
+        print "data downloaded from hdfs."
     else:
         print "I didn't understand your input."
         window(m)
+
+if __name__ == "__main__":
+    interacter()
