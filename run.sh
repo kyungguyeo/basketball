@@ -33,6 +33,9 @@ hdfs dfs -put player_urls.txt /urls
 hdfs dfs -put seasonstanding_urls.txt /urls
 hdfs dfs -put boxscore_urls.txt /urls
 
+
+/urls
+
 hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-2.7.1.jar \
     -file mapper.py -mapper mapper.py \
     -file reducer.py -reducer reducer.py \
