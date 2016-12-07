@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, urllib2, re
-from subprocess import
+from subprocess import call
 
 for line in sys.stdin:
     url, val = line.split('\t',1)
