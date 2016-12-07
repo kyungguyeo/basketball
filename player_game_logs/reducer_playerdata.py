@@ -9,3 +9,5 @@ for line in sys.stdin:
     response.close()
     with open(filename.strip(), 'w') as file:
         file.write(html)
+    call(['hdfs', 'dfs', '-put', filename.strip(), '/playergamelogs_raw'])
+    call(['rm', filename.strip()])

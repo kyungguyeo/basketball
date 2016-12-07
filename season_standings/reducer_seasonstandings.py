@@ -10,3 +10,5 @@ for line in sys.stdin:
     year = re.findall(r'\d+', url)
     with open('NBA_%s.html' %(year[0]), 'w') as file:
         file.write(html)
+    call(['hdfs', 'dfs', '-put', 'NBA_%s.html' %(year[0]), '/seasonstandings_raw'])
+    call(['rm', 'NBA_%s.html' %(year[0])])
