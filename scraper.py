@@ -110,32 +110,30 @@ if __name__ == "__main__":
     conf = SparkConf().setAppName("Bball_stat_crawler")
     sc = SparkContext(conf=conf)
 
-    # # Grab Season Standings Data
-    # standings_url_par = sc.wholeTextFiles("/seasonstandings_raw/*")
-    # season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).collect()
-    # for standings in season_standings_data:
-    #     local_path = '/root/' + standings[1]
-    #     standings[0].to_csv(local_path, index=False)
+    # Grab Season Standings Data
+    standings_url_par = sc.wholeTextFiles("/seasonstandings_raw/*")
+    season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).collect()
+    for standings in season_standings_data:
+        local_path = '/root/' + standings[1]
+        standings[0].to_csv(local_path, index=False)
 
-    # # Aggregate boxscore urls for box_score_scrape
-    # boxscore_url_par = sc.wholeTextFiles("/gamescores_raw/*")
-    # boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).collect()
-    # for boxscore in boxscore_data:
-    #     path = '/root/' + boxscore[1]
-    #     if boxscore[0].empty == 0:
-    #         boxscore[0].to_csv(path, index=False)
+    # Aggregate boxscore urls for box_score_scrape
+    boxscore_url_par = sc.wholeTextFiles("/gamescores_raw/*")
+    boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).collect()
+    for boxscore in boxscore_data:
+        path = '/root/' + boxscore[1]
+        if boxscore[0].empty == 0:
+            boxscore[0].to_csv(path, index=False)
 
-    # # Grab Player Season Data
-    # player_url_par = sc.wholeTextFiles("/playerseasonlogs_raw/*")
-    # player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).collect()
-    # for player in player_season_data:
-    #     path = '/root/' + player[1]
-    #     player[0].to_csv(path, index=False)
+    # Grab Player Season Data
+    player_url_par = sc.wholeTextFiles("/playerseasonlogs_raw/*")
+    player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).collect()
+    for player in player_season_data:
+        path = '/root/' + player[1]
+        player[0].to_csv(path, index=False)
 
     # Grab Player Game Log Data
-    #player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/[fghijkl]*")
-    #player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/[mnopq]*")
-    player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/[rstuvyz]*")
+    player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/*")
     player_game_log_data = player_gamelog_url_par.map(lambda x: player_game_log_scrape(x)).collect()
     for log in player_game_log_data:
         path = '/root/' + log[1]

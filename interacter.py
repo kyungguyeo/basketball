@@ -36,8 +36,8 @@ def interacter():
     retriever(mode_resp)
 
 def mode():
-    mode = raw_input("What kind of data do you want? \
-    (gamescore[g]/seasonstandings[s]/playergamelogs[pg]/playerseasonlogs[ps]): ")
+    mode = raw_input("What kind of data do you want? "
+                     "(gamescore[g]/seasonstandings[s]/playergamelogs[pg]/playerseasonlogs[ps]): ")
     if mode == ('g' or 's' or 'pg' or 'ps'):
         return mode
     else:
@@ -46,18 +46,18 @@ def mode():
 
 def retriever(m):
     if m == 'g':
-        w = raw_input("You entered gamescore. Please input the desired date range, in mmddyyyy format for one day, and \
-        mmddyyyy-mmddyyyy format for multiple days: ")
+        w = raw_input("You entered gamescore. Please input the desired date range, "
+                      "in mmddyyyy format for one day, and mmddyyyy-mmddyyyy format for multiple days: ")
         dates = w.split('-')
         for date in dates:
-            hdfs_path = '/gamescore/' + date + '.csv'
+            hdfs_path = '/gamescore/' + date + '_boxscore.csv'
             command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
         print "data downloaded from hdfs."
     elif m == 's':
-        w = raw_input("You entered seasonstandings. Please input the desired year range, in yyyy format for 1 year, and\
-                      yyyy-yyyy format for multiple years: ")
+        w = raw_input("You entered seasonstandings. Please input the desired year range, "
+                      "in yyyy format for 1 year, and yyyy-yyyy format for multiple years: ")
         years = w.split('-')
         for year in years:
             hdfs_path = '/seasonstandings/' + year + 'seasonstandings.csv'
@@ -66,21 +66,28 @@ def retriever(m):
             call(commands)
         print "data downloaded from hdfs."
     elif m == 'pg':
-        w = raw_input("You entered playergamelogs. Please input the desired player ids (found under \
-        http://www.basketball-reference.com/players/). For multiple, separate ids with semicolons (;): ")
+        w = raw_input("You entered playergamelogs. Please input the desired player ids and desired year, "
+                      "in player_id-yyyy format (player_id found under http://www.basketball-reference.com/players/)."
+                      " For multiple, separate id-yyyy's with semicolons (;). If you want all gamelogs of a player,"
+                      "add just the names, without any years: ")
         names = w.split(';')
         for name in names:
-            hdfs_path = '/playergamelogs/' + name + '.csv'
-            command = "hdfs dfs -get " + hdfs_path
+            player = name.split('-')
+            if len(player) == 2:
+                hdfs_path = '/playergamelogs/' + player[0] + 'gamelog' + player[1] + '.csv'
+                command = "hdfs dfs -get " + hdfs_path
+            else:
+                hdfs_path = '/playergamelogs/' + player[0] + '*'
+                command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
         print "data downloaded from hdfs."
     elif m == 'ps':
-        w = raw_input("You entered playerseasonlogs. Please input the desired player ids (found under \
-        http://www.basketball-reference.com/players/). For multiple, separate ids with semicolons (;): ")
+        w = raw_input("You entered playerseasonlogs. Please input the desired player ids (found under "
+                      "http://www.basketball-reference.com/players/). For multiple, separate ids with semicolons (;): ")
         names = w.split(';')
         for name in names:
-            hdfs_path = '/playerseasonlogs/' + name + '.csv'
+            hdfs_path = '/playerseasonlogs/' + name + '_seasonlogs.csv'
             command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
