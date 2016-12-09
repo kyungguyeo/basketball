@@ -1,15 +1,21 @@
 from bs4 import BeautifulSoup
 from pyspark import SparkContext, SparkConf
-from subprocess import call
-import unicodedata, re, pandas
+import unicodedata, re, pandas, os
+
+
+def read_local_dir(local_path):
+    for fn in os.listdir(local_path):
+        path = os.path.join(local_path, fn)
+        if os.path.isfile(path):
+            yield path, open(path).read()
 
 
 def player_scrape_by_season(file):
     """
     Scrapes a player's season-by-season per-game stats
     """
-    html = file[0][1]
-    filename = file[0][0].split('/')[-1]
+    html = file[1]
+    filename = file[0].split('/')[-1]
     soup = BeautifulSoup(html, 'html.parser')
     all_seasonlogs = {}
     outfile = filename.strip(".html").split("/")[-1] + '_seasonlogs.csv'
@@ -30,12 +36,13 @@ def player_game_log_scrape(file):
     """
     Scrape the player's game logs, return a dictionary with (key, val) => (game, stats)
     """
-    html = file[0][1]
+    html = file[1]
     soup = BeautifulSoup(html, 'html.parser')
     all_game_logs = {}
-    filename = file[0][0].split('/')[-1] + '.csv'
-    player_name = ' '.join(soup.find('h1').getText().split(' ')[:-3])
+    filename = file[0].split('/')[-1][:-5] + '.csv'
+    player_name = ''
     try:
+        player_name = ' '.join(soup.find('h1').getText().split(' ')[:-3])
         logs = soup.find("div", class_="table_outer_container").find("tbody").find_all("tr")
         for log in logs:
             if log.has_attr('id'):
@@ -47,7 +54,8 @@ def player_game_log_scrape(file):
     except:
         pass
     final_df = pandas.DataFrame.from_dict(all_game_logs, orient='index')
-    final_df['player_name'] = player_name
+    if player_name:
+        final_df['player_name'] = player_name
     return final_df, filename
 
 
@@ -55,8 +63,8 @@ def box_score_scrape(file):
     """
     Scrape every boxscore for the particular day on basketball-reference
     """
-    html = file[0][1]
-    filename = file[0][0].split('/')[-1]
+    html = file[1]
+    filename = file[0].split('/')[-1]
     soup = BeautifulSoup(html, 'html.parser')
     all_game_scores = {}
     date = re.findall(r'\d+', filename)
@@ -80,8 +88,8 @@ def season_standings_scrape(file):
     """
     Scrape season standings for that particular season
     """
-    html = file[0][1]
-    filename = file[0][0].split('/')[-1]
+    html = file[1]
+    filename = file[0].split('/')[-1]
     soup = BeautifulSoup(html, 'html.parser')
     all_season_standings = {}
     outfile = re.findall(r'\d+', filename)[0] + 'seasonstandings.csv'
@@ -102,41 +110,33 @@ if __name__ == "__main__":
     conf = SparkConf().setAppName("Bball_stat_crawler")
     sc = SparkContext(conf=conf)
 
-    # Grab Season Standings Data
-    standings_url_par = sc.wholeTextFiles("/seasonstandings_raw")
-    season_standings_data = standings_url_par.flatMap(lambda x: season_standings_scrape(x)).collect()
-    for i in [i for i in range(len(season_standings_data)) if i % 2 == 0]:
-        path = '/root/' + season_standings_data[i + 1]
-        season_standings_data[i].to_csv(path, index=False)
-    call(['hdfs', 'dfs', '-put', '/root/*.csv', '/data/seasonstandings'])
-    call(['rm', '-f', '*.csv'])
+    # # Grab Season Standings Data
+    # standings_url_par = sc.wholeTextFiles("/seasonstandings_raw/*")
+    # season_standings_data = standings_url_par.map(lambda x: season_standings_scrape(x)).collect()
+    # for standings in season_standings_data:
+    #     local_path = '/root/' + standings[1]
+    #     standings[0].to_csv(local_path, index=False)
 
-    # Aggregate boxscore urls for box_score_scrape
-    boxscore_url_par = sc.wholeTextFiles("/gamescores_raw/*")
-    boxscore_data = boxscore_url_par.flatMap(lambda x: box_score_scrape(x)).collect()
-    for i in [i for i in range(len(boxscore_data)) if i % 2 == 0]:
-        path = '/root/' + boxscore_data[i + 1]
-        if boxscore_data[i].empty == 0:
-            boxscore_data[i].to_csv(path, index=False)
-    call(['hdfs', 'dfs', '-put', '/root/*.csv', '/data/gamescores'])
-    call(['rm', '-f', '*.csv'])
+    # # Aggregate boxscore urls for box_score_scrape
+    # boxscore_url_par = sc.wholeTextFiles("/gamescores_raw/*")
+    # boxscore_data = boxscore_url_par.map(lambda x: box_score_scrape(x)).collect()
+    # for boxscore in boxscore_data:
+    #     path = '/root/' + boxscore[1]
+    #     if boxscore[0].empty == 0:
+    #         boxscore[0].to_csv(path, index=False)
 
-    # Grab Player Season Data
-    player_url_par = sc.wholeTextFiles("playerseasonlogs_raw/*")
-    player_season_data = player_url_par.flatMap(lambda x: player_scrape_by_season(x)).collect()
-    for i in [i for i in range(len(player_season_data)) if i % 2 == 0]:
-        path = '/root/' + player_season_data[i + 1]
-        player_season_data[i].to_csv(path, index=False)
-    call(['hdfs', 'dfs', '-put', '/root/*.csv', '/data/playerseasonlogs'])
-    call(['rm', '-f', '*.csv'])
+    # # Grab Player Season Data
+    # player_url_par = sc.wholeTextFiles("/playerseasonlogs_raw/*")
+    # player_season_data = player_url_par.map(lambda x: player_scrape_by_season(x)).collect()
+    # for player in player_season_data:
+    #     path = '/root/' + player[1]
+    #     player[0].to_csv(path, index=False)
 
     # Grab Player Game Log Data
-    player_gamelog_url_par = sc.wholeTextFiles("playergamelogs_raw/*")
-    player_game_log_data = player_url_par.flatMap(lambda x: player_game_log_scrape(x)).collect()
-    for i in [i for i in range(len(player_game_log_data)) if i % 2 == 0]:
-        path = '/root/' + player_game_log_data[i + 1]
-        player_game_log_data[i].to_csv(path, index=False)
-    call(['hdfs', 'dfs', '-put', '/root/*.csv', '/data/playergamelogs'])
-    call(['rm', '-f', '*.csv'])
-
-
+    #player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/[fghijkl]*")
+    #player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/[mnopq]*")
+    player_gamelog_url_par = sc.wholeTextFiles("/playergamelogs_raw/[rstuvyz]*")
+    player_game_log_data = player_gamelog_url_par.map(lambda x: player_game_log_scrape(x)).collect()
+    for log in player_game_log_data:
+        path = '/root/' + log[1]
+        log[0].to_csv(path, index=False)

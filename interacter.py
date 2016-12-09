@@ -36,8 +36,8 @@ def interacter():
     retriever(mode_resp)
 
 def mode():
-    mode = raw_input("What kind of data do you want? (gamescore[g]/seasonstandings[s]/playergamelogs[pg]\
-    /playerseasonlogs[ps]): ")
+    mode = raw_input("What kind of data do you want? \
+    (gamescore[g]/seasonstandings[s]/playergamelogs[pg]/playerseasonlogs[ps]): ")
     if mode == ('g' or 's' or 'pg' or 'ps'):
         return mode
     else:
