@@ -35,32 +35,34 @@ def interacter():
     mode_resp = mode()
     retriever(mode_resp)
 
+
 def mode():
-    mode = raw_input("What kind of data do you want? "
+    mode_resp = raw_input("What kind of data do you want? "
                      "(gamescore[g]/seasonstandings[s]/playergamelogs[pg]/playerseasonlogs[ps]): ")
-    if mode == ('g' or 's' or 'pg' or 'ps'):
-        return mode
+    if mode_resp in ['g','s','pg','ps']:
+        return mode_resp
     else:
         print "I didn't understand your input."
         mode()
 
+
 def retriever(m):
     if m == 'g':
         w = raw_input("You entered gamescore. Please input the desired date range, "
-                      "in mmddyyyy format for one day, and mmddyyyy-mmddyyyy format for multiple days: ")
-        dates = w.split('-')
+                      "in mmddyyyy format for one day, and mmddyyyy;mmddyyyy;... format for multiple days: ")
+        dates = w.split(';')
         for date in dates:
-            hdfs_path = '/gamescore/' + date + '_boxscore.csv'
+            hdfs_path = '/data/gamescore/' + date + '_boxscore.csv'
             command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
         print "data downloaded from hdfs."
     elif m == 's':
         w = raw_input("You entered seasonstandings. Please input the desired year range, "
-                      "in yyyy format for 1 year, and yyyy-yyyy format for multiple years: ")
-        years = w.split('-')
+                      "in yyyy format for 1 year, and yyyy;yyyy;... format for multiple years: ")
+        years = w.split(';')
         for year in years:
-            hdfs_path = '/seasonstandings/' + year + 'seasonstandings.csv'
+            hdfs_path = '/data/seasonstandings/' + year + 'seasonstandings.csv'
             command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
@@ -77,7 +79,7 @@ def retriever(m):
                 hdfs_path = '/playergamelogs/' + player[0] + 'gamelog' + player[1] + '.csv'
                 command = "hdfs dfs -get " + hdfs_path
             else:
-                hdfs_path = '/playergamelogs/' + player[0] + '*'
+                hdfs_path = '/data/playergamelogs/' + player[0] + '*'
                 command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
@@ -87,14 +89,14 @@ def retriever(m):
                       "http://www.basketball-reference.com/players/). For multiple, separate ids with semicolons (;): ")
         names = w.split(';')
         for name in names:
-            hdfs_path = '/playerseasonlogs/' + name + '_seasonlogs.csv'
+            hdfs_path = '/data/playerseasonlogs/' + name + '_seasonlogs.csv'
             command = "hdfs dfs -get " + hdfs_path
             commands = command.split(" ")
             call(commands)
         print "data downloaded from hdfs."
     else:
         print "I didn't understand your input."
-        window(m)
+        retriever(m)
 
 if __name__ == "__main__":
     interacter()
