@@ -38,7 +38,7 @@ def interacter():
 
 def mode():
     mode_resp = raw_input("What kind of data do you want? "
-                     "(gamescore[g]/seasonstandings[s]/playergamelogs[pg]/playerseasonlogs[ps]): ")
+                          "(gamescore[g]/seasonstandings[s]/playergamelogs[pg]/playerseasonlogs[ps]): ")
     if mode_resp in ['g','s','pg','ps']:
         return mode_resp
     else:

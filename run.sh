@@ -38,8 +38,3 @@ chmod a+x basketball/hive.sh
 basketball/hive.sh
 
 hive basketball/hive_db_setup.sh
-
-#hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-2.7.1.jar \
-#-file basketball/season_standings/mapper.py -mapper basketball/season_standings/mapper.py \
-#-file basketball/season_standings/reducer_seasonstandings.py -reducer basketball/season_standings/reducer_seasonstandings.py \
-#-input hdfs://23.246.218.75/urls/seasonstanding_urls.txt -output hdfs://23.246.218.75/test

@@ -28,10 +28,10 @@
 
 From local machine, run the shell script "run.sh", and input the public ip address of the master node of the remote vms.
 This should:
-    - Scrape data from basketball-reference.com
-    - Set up hive
-    - Put all data into HDFS
-    - Create hive tables from data
+ - Scrape data from basketball-reference.com
+ - Set up hive
+ - Put all data into HDFS
+ - Create hive tables from data
 
 After this is done, try logging in and testing the database:
 ```shell

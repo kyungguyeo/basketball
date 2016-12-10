@@ -1,0 +1,62 @@
+---
+title: "Fav_NBA_Players_Demo_Analysis"
+output: pdf_document
+---
+```{r, echo=FALSE}
+setwd("~/Documents/MIDS/w251/basketball/hakeem")
+data.yrly <- read.csv("olajuha01_seasonlogs.csv")
+```
+
+##Player 1: Hakeem Olajuwon
+
+```{r, echo=FALSE}
+par(mfrow=c(3,2))
+barplot(data.yrly$pts_per_g, names.arg = data.yrly$season, main = "Points per Game, by Season", xlab = "Season", ylab = "Points", col="red")
+barplot(data.yrly$trb_per_g, names.arg = data.yrly$season, main = "Total Rebounds per Game, by Season", xlab = "Season", ylab = "Rebounds", col="gray")
+barplot(data.yrly$ast_per_g, names.arg = data.yrly$season, main = "Assists per Game, by Season", xlab = "Season", ylab = "Assists", col="blue")
+barplot(data.yrly$stl_per_g, names.arg = data.yrly$season, main = "Steals per Game, by Season", xlab = "Season", ylab = "Steals", col="green")
+barplot(data.yrly$blk_per_g, names.arg = data.yrly$season, main = "Blocks per Game, by Season", xlab = "Season", ylab = "Blocks", col="orange")
+barplot(data.yrly$tov_per_g, names.arg = data.yrly$season, main = "Turnovers per Game, by Season", xlab = "Season", ylab = "Turnovers", col="purple")
+```
+
+How big of an offensive load did Olajuwon take over the years? And what kind of offensive load?
+
+```{r, echo=FALSE}
+par(mfrow=c(3,2))
+plot(data.yrly$fg2_pct, main = "2 Pt Field Goal %, by Season (1984-2002)", ylab = "2 Pt FG %", cex=.6, col='blue', pch=19)
+plot(data.yrly$fg2a_per_g, main = "2 Pt Field Goal Attempts, by Season (1984-2002)", ylab = "2 PtFGA", cex=.6, col='lightblue', pch=19)
+plot(data.yrly$fg3_pct, main = "3 Pt Field Goal %, by Season (1984-2002)", ylab = "3 Pt FG %", cex=.6, col='red', pch=19)
+plot(data.yrly$fg3a_per_g, main = "3 Pt Field Goal Attempts, by Season (1984-2002)", ylab = "3 Pt FGA", cex=.6, col='orange', pch=19)
+plot(data.yrly$ft_pct, main = "Free Throw %, by Season (1984-2002)", ylab = "FG %", cex=.6, col='darkgreen', pch=19)
+plot(data.yrly$fta_per_g, main = "Free Throw Attempts, by Season (1984-2002)", ylab = "FTA", cex=.6, col='lightgreen', pch=19)
+```
+
+How has Olajuwon improved over the years?
+
+What was his peak year?
+
+
+
+What kind of player did he turn into?
+-looking at trends of his major stats, can we see whether or not he became more of a scorer as time went on, more aggressive to the rim (more fta) or more efficient w the ball, less fouls, more healthy, etc?
+
+What about Olajuwon made him truly great? Can we tell from his stats?
+
+What was his biggest night, statistically, in terms of:
+-points
+-rebounds
+-assists
+-blks
+-stls
+
+In 1993:
+
+Trend of ppg of gamelogs w highest win share - 1993
+
+What was his peak game?
+
+How many double doubles did he have?
+
+How many triple doubles?
+
+How many quadruple doubles?
