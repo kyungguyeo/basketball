@@ -76,7 +76,7 @@ def retriever(m):
         for name in names:
             player = name.split('-')
             if len(player) == 2:
-                hdfs_path = 'data/playergamelogs/' + player[0] + 'gamelog' + player[1] + '.csv'
+                hdfs_path = '/data/playergamelogs/' + player[0] + 'gamelog' + player[1] + '.csv'
                 command = "hdfs dfs -get " + hdfs_path
             else:
                 hdfs_path = '/data/playergamelogs/' + player[0] + '*'
