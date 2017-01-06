@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from pyspark import SparkContext, SparkConf
 import unicodedata, re, pandas, os
-
+#BLAHBLAHBLAH! RANDOM COMMENT ATTACK!
 
 def read_local_dir(local_path):
     for fn in os.listdir(local_path):
